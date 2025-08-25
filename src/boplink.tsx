@@ -226,7 +226,7 @@ Podcasts: Apple Podcasts → Google Podcasts, Overcast, Castbox, Pocket Casts"
             />
           )}
 
-          {convertedLinks.map((link) => (
+          {convertedLinks.map((link, index) => (
             <List.Item
               key={link.platform.id}
               title={link.platform.name}
@@ -242,9 +242,10 @@ Podcasts: Apple Podcasts → Google Podcasts, Overcast, Castbox, Pocket Casts"
               actions={
                 <ActionPanel>
                   <Action.CopyToClipboard
-                    title="Copy Link"
+                    title={index < 9 ? `Copy Link (⌘${index + 1})` : "Copy Link"}
                     content={link.url}
                     icon={Icon.Clipboard}
+                    shortcut={index < 9 ? { modifiers: ["cmd"], key: String(index + 1) as any } : undefined}
                     onCopy={() => handleCopyLink(link)}
                   />
 
