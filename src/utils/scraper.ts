@@ -218,7 +218,10 @@ export class SongLinkScraper {
       // Extract metadata and links from the page
       const pageData = await page.evaluate(() => {
         const results: Array<{ platform: string; url: string }> = [];
-        const metadata: any = {};
+        const metadata: {
+          title?: string;
+          type?: string;
+        } = {};
 
         // ========== EXTRACT METADATA ==========
 
@@ -241,63 +244,6 @@ export class SongLinkScraper {
               metadata.title = element.textContent?.trim();
             }
             if (metadata.title) break;
-          }
-        }
-
-        // Try to find the artist name
-        const artistSelectors = [
-          "h2",
-          '[class*="ArtistName"]',
-          '[class*="artist-name"]',
-          '[class*="Artist"]',
-          'meta[property="og:description"]',
-          'meta[name="twitter:description"]',
-        ];
-
-        for (const selector of artistSelectors) {
-          const element = document.querySelector(selector);
-          if (element) {
-            if (element.tagName === "META") {
-              const content = (element as HTMLMetaElement).content;
-              // Extract artist from description (often formatted as "by Artist")
-              const match = content.match(/by\s+([^·•\-]+)/i);
-              if (match) {
-                metadata.artist = match[1].trim();
-              } else {
-                metadata.artist = content.split("·")[0]?.trim() || content.split("-")[0]?.trim();
-              }
-            } else {
-              const text = element.textContent?.trim();
-              // Make sure we're not getting the title again
-              if (text && !text.includes(metadata.title)) {
-                metadata.artist = text;
-              }
-            }
-            if (metadata.artist) break;
-          }
-        }
-
-        // Try to get artwork/thumbnail
-        const imageSelectors = [
-          'img[alt*="artwork"]',
-          'img[alt*="cover"]',
-          'img[src*="artwork"]',
-          'img[src*="cover"]',
-          '[class*="artwork"] img',
-          '[class*="cover"] img',
-          'meta[property="og:image"]',
-          'meta[name="twitter:image"]',
-        ];
-
-        for (const selector of imageSelectors) {
-          const element = document.querySelector(selector);
-          if (element) {
-            if (element.tagName === "META") {
-              metadata.thumbnail = (element as HTMLMetaElement).content;
-            } else {
-              metadata.thumbnail = (element as HTMLImageElement).src;
-            }
-            if (metadata.thumbnail) break;
           }
         }
 

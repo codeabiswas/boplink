@@ -9,7 +9,7 @@
   "commands": [
     {
       "name": "boplink",
-      "title": "boplink",
+      "title": "Boplink",
       "description": "Lists all platforms the song is available in",
       "mode": "view",
       "arguments": [

@@ -43,6 +43,5 @@ export interface ScrapeResult {
   metadata?: {
     title?: string;
     type?: string; // 'track', 'album', 'playlist', 'podcast'
-    thumbnail?: string; // URL to album/track artwork
   };
 }

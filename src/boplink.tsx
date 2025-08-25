@@ -12,6 +12,8 @@ interface BopLinkArguments {
   url?: string;
 }
 
+type KeyboardKey = "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9";
+
 /**
  * Main command component for BopLink
  * Handles both direct URL arguments and form input
@@ -21,10 +23,13 @@ export default function Command(props: LaunchProps<{ arguments: BopLinkArguments
   const [inputUrl, setInputUrl] = useState<string>(props.arguments.url || "");
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [convertedLinks, setConvertedLinks] = useState<ConvertedLink[]>([]);
-  const [metadata, setMetadata] = useState<any>(null); // Add this
+  const [metadata, setMetadata] = useState<{
+    title?: string;
+    type?: string;
+    thumbnail?: string;
+  } | null>(null);
   const [error, setError] = useState<string>("");
   const [showForm, setShowForm] = useState<boolean>(!props.arguments.url);
-  const [sourcePlatform, setSourcePlatform] = useState<string | null>(null);
 
   const [scraper] = useState(() => new SongLinkScraper());
 
@@ -32,7 +37,6 @@ export default function Command(props: LaunchProps<{ arguments: BopLinkArguments
     setError("");
     setConvertedLinks([]);
     setMetadata(null); // Reset metadata
-    setSourcePlatform(null); // Reset source platform
 
     const validation = URLValidator.validate(url);
 
@@ -44,11 +48,6 @@ export default function Command(props: LaunchProps<{ arguments: BopLinkArguments
         message: validation.error || "Please enter a valid streaming platform URL",
       });
       return;
-    }
-
-    // Store the source platform ID
-    if (validation.platform) {
-      setSourcePlatform(validation.platform.id);
     }
 
     if (!URLValidator.needsConversion(url)) {
@@ -245,7 +244,7 @@ Podcasts: Apple Podcasts → Google Podcasts, Overcast, Castbox, Pocket Casts"
                     title={index < 9 ? `Copy Link (⌘${index + 1})` : "Copy Link"}
                     content={link.url}
                     icon={Icon.Clipboard}
-                    shortcut={index < 9 ? { modifiers: ["cmd"], key: String(index + 1) as any } : undefined}
+                    shortcut={index < 9 ? { modifiers: ["cmd"], key: String(index + 1) as KeyboardKey } : undefined}
                     onCopy={() => handleCopyLink(link)}
                   />
 
