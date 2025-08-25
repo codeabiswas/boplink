@@ -24,6 +24,7 @@ export default function Command(props: LaunchProps<{ arguments: BopLinkArguments
   const [metadata, setMetadata] = useState<any>(null); // Add this
   const [error, setError] = useState<string>("");
   const [showForm, setShowForm] = useState<boolean>(!props.arguments.url);
+  const [sourcePlatform, setSourcePlatform] = useState<string | null>(null);
 
   const [scraper] = useState(() => new SongLinkScraper());
 
@@ -31,6 +32,7 @@ export default function Command(props: LaunchProps<{ arguments: BopLinkArguments
     setError("");
     setConvertedLinks([]);
     setMetadata(null); // Reset metadata
+    setSourcePlatform(null); // Reset source platform
 
     const validation = URLValidator.validate(url);
 
@@ -42,6 +44,11 @@ export default function Command(props: LaunchProps<{ arguments: BopLinkArguments
         message: validation.error || "Please enter a valid streaming platform URL",
       });
       return;
+    }
+
+    // Store the source platform ID
+    if (validation.platform) {
+      setSourcePlatform(validation.platform.id);
     }
 
     if (!URLValidator.needsConversion(url)) {
@@ -82,7 +89,9 @@ export default function Command(props: LaunchProps<{ arguments: BopLinkArguments
         });
         setShowForm(true);
       } else {
-        setConvertedLinks(result.links);
+        // Filter out the source platform from the results
+        const filteredLinks = result.links.filter((link) => link.platform.id !== validation.platform?.id);
+        setConvertedLinks(filteredLinks);
         setMetadata(result.metadata); // Store metadata
 
         // Update success message with song info if available
@@ -222,13 +231,12 @@ Podcasts: Apple Podcasts → Google Podcasts, Overcast, Castbox, Pocket Casts"
               key={link.platform.id}
               title={link.platform.name}
               subtitle={URLValidator.extractDomain(link.url)}
-              // icon={link.platform.icon ? { source: `platform-icons/${link.platform.icon}` } : Icon.Link}
               icon={
                 link.platform.icon
                   ? {
                       source: `${link.platform.icon}`,
                     }
-                  : Icon.Link
+                  : Icon.Music
               }
               accessories={[{ icon: Icon.Link, tooltip: "Copy link" }]}
               actions={
@@ -239,13 +247,6 @@ Podcasts: Apple Podcasts → Google Podcasts, Overcast, Castbox, Pocket Casts"
                     icon={Icon.Clipboard}
                     onCopy={() => handleCopyLink(link)}
                   />
-
-                  {/*<Action.OpenInBrowser
-                    title="Open in Browser"
-                    url={link.url}
-                    icon={Icon.Globe}
-                    shortcut={{ modifiers: ["cmd"], key: "enter" }}
-                  />*/}
 
                   <ActionPanel.Section>
                     <Action
